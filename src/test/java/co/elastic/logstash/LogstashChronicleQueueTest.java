@@ -53,7 +53,7 @@ public class LogstashChronicleQueueTest
 
             for (int i=0; i<count; i++) {
                 String input = "Hello " + i;
-                byte[] output = tailer.pop();
+                byte[] output = tailer.deq();
 
                 assertEquals(new String(output), input);
             }
@@ -75,18 +75,21 @@ public class LogstashChronicleQueueTest
             LogstashChronicleQueue.Tailer tailer = q.getTailer();
 
             for (int i=0; i<50; i++) {
-                appender.push(("hello " + i).getBytes());
+                String msg = ("hello " + i);
+                appender.push(msg.getBytes());
             }
 
+            String lastMsg = null;
             for (int i=0; i<25; i++) {
-                tailer.deq();
+                lastMsg = new String(tailer.deq());
                 tailer.ack();
             }
-            //q.close();
+            q.close();
 
             LogstashChronicleQueue newQ = new LogstashChronicleQueue(basePath);
             LogstashChronicleQueue.Tailer newTailer = newQ.getTailer();
-            assertEquals(new String(tailer.pop()), "hello 25");
+
+            assertEquals(new String(newTailer.deq()), lastMsg);
 
 
         } catch (IOException e) {

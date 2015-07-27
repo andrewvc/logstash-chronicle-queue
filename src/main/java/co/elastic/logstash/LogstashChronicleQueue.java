@@ -103,23 +103,22 @@ public class LogstashChronicleQueue
             tailer = chronicle.createTailer();
             trackerAppender = lcq.getTracker().createAppender();
 
-            // These are always the same value. Probably because a long is a fixed len?
-            tailer.limit(lcq.getResumeOffset());
-            tailer.position(lcq.getResumeOffset());
+            tailer.index(lcq.getResumeOffset() - 1);
         }
 
         public byte[] deq() {
-            return pop();
-        }
-
-        public byte[] pop() {
             while(!tailer.nextIndex());
             return (byte[]) tailer.readObject();
         }
 
+        // Move forward one record without reading the data
+        public void next() {
+            tailer.nextIndex();
+        }
+
         public void ack() {
             trackerAppender.startExcerpt(8);
-            trackerAppender.writeLong(tailer.position());
+            trackerAppender.writeLong(tailer.index());
             trackerAppender.finish();
             tailer.finish();
         }

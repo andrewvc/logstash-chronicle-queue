@@ -44,6 +44,11 @@
             </executions>
             <configuration>
                 <finalName>uber-${artifactId}-${version}</finalName>
+                <artifactSet>
+                    <excludes>
+                        <exclude>org.jruby:*</exclude>
+                    </excludes>
+                </artifactSet>
             </configuration>
         </plugin>
     </plugins>
